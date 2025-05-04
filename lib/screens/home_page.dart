@@ -6,6 +6,8 @@ import 'package:pawpress/widgets/header_widget.dart';
 import 'package:pawpress/widgets/service_card.dart';
 import 'package:pawpress/widgets/bottom_nav_bar.dart';
 import 'package:pawpress/screens/OwnerProfile.dart';
+import 'package:pawpress/screens/nearbyVets.dart';
+
 
 void main() {
   petOwner owner = petOwner(
@@ -91,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 10),
             buildPetsList(),
             SizedBox(height: 20),
-            sectionTitle("Our Services"),
+            sectionTitle("Services"),
             SizedBox(height: 10),
             buildServicesList(),
             SizedBox(height: 20),
@@ -129,31 +131,42 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 20),
         children: [
-          petAvatar("Suzy"),
-          petAvatar("Marry"),
-          petAvatar("Bob"),
-          petAvatar("Ruby"),
-          petAvatar("Alice"),
+          petAvatar("Caramel"),
+          petAvatar("Beth"),
+          petAvatar("Ahmad"),
+          petAvatar("Max"),
+          petAvatar("Rex"),
         ],
       ),
     );
   }
 
   Widget buildServicesList() {
-    return SizedBox(
-      height: 150,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        children: [
-          ServiceCard(icon: Icons.store, serviceName: 'MarketPlace'),
-          ServiceCard(icon: Icons.people, serviceName: 'Community'),
-          ServiceCard(icon: Icons.local_hospital, serviceName: 'Vet Clinics'),
-          ServiceCard(icon: Icons.description, serviceName: 'Medical Report'),
-        ],
-      ),
-    );
-  }
+  return SizedBox(
+    height: 150,
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      children: [
+        ServiceCard(icon: Icons.store, serviceName: 'MarketPlace'),
+        ServiceCard(icon: Icons.people, serviceName: 'Community'),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NearbyVetsScreen(),
+              ),
+            );
+          },
+          child: ServiceCard(icon: Icons.local_hospital, serviceName: 'Vet Clinics'),
+        ),
+        ServiceCard(icon: Icons.description, serviceName: 'Medical Report'),
+      ],
+    ),
+  );
+}
+
 
   Widget buildAppointmentsList() {
     return Column(
