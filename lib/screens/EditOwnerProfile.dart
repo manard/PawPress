@@ -84,7 +84,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('تغيير الصورة قريباً!'),
+                                  content: Text('Image changed'),
                                 ),
                               );
                             },

@@ -2,41 +2,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/models/appointment.dart';
+import 'package:pawpress/screens/MarketPlacePage.dart';
+import 'package:pawpress/screens/NearbyVets.dart';
 import 'package:pawpress/widgets/header_widget.dart';
 import 'package:pawpress/widgets/service_card.dart';
 import 'package:pawpress/widgets/bottom_nav_bar.dart';
 import 'package:pawpress/screens/OwnerProfile.dart';
 
-void main() {
-  petOwner owner = petOwner(
-    username: "Manar",
-    email: "manar@gmail.com",
-    password: "123",
-    address: "qalandia",
-    phoneNumber: 123456,
-    imageName: 'profile.png',
-  );
-
-  runApp(MyApp(owner: owner));
-}
-
-class MyApp extends StatelessWidget {
-  final petOwner owner;
-  const MyApp({super.key, required this.owner});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(owner: owner),
-    );
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   final petOwner owner;
 
-  HomeScreen({super.key, required this.owner});
+  const HomeScreen({super.key, required this.owner});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -86,17 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             HeaderWidget(owner: widget.owner),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             sectionTitle("My Pets"),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             buildPetsList(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             sectionTitle("Our Services"),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             buildServicesList(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             sectionTitle("Upcoming Reminders"),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             buildAppointmentsList(),
           ],
         ),
@@ -113,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.blue,
+          color: Color(0xFF1C4966), // أزرق داكن أنيق
         ),
       ),
     );
@@ -127,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 100,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
           petAvatar("Suzy"),
           petAvatar("Marry"),
@@ -144,11 +120,35 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 150,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          ServiceCard(icon: Icons.store, serviceName: 'MarketPlace'),
+          ServiceCard(
+            icon: Icons.store,
+            serviceName: 'MarketPlace',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => MarketPlacePage(
+                        owner: widget.owner,
+                        pageTitle: 'MarketPlace',
+                      ),
+                ),
+              );
+            },
+          ),
           ServiceCard(icon: Icons.people, serviceName: 'Community'),
-          ServiceCard(icon: Icons.local_hospital, serviceName: 'Vet Clinics'),
+          ServiceCard(
+            icon: Icons.local_hospital,
+            serviceName: 'Vet Clinics',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NearbyVetsScreen()),
+              );
+            },
+          ),
           ServiceCard(icon: Icons.description, serviceName: 'Medical Report'),
         ],
       ),
@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     bool isThisWeek =
         app.appointmentDate.isAfter(now) &&
-        app.appointmentDate.isBefore(now.add(Duration(days: 7)));
+        app.appointmentDate.isBefore(now.add(const Duration(days: 7)));
 
     bool isThisMonth =
         app.appointmentDate.month == now.month &&
@@ -189,8 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      color: Color(0xFFb7efc5),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      color: const Color(0xFFE7F6EF), // أخضر فاتح
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
@@ -203,23 +203,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: Text(
                     app.reason,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 98, 160, 102),
+                      color: Color(0xFF1C7259), // أخضر جميل
                     ),
                   ),
                 ),
                 if (label.isNotEmpty)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.green[300],
+                      color: const Color(0xFF88C9BF),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       label,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -228,21 +231,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "${app.petName} ${formatDateTime(app.appointmentDate)}",
-              style: TextStyle(color: Colors.black54),
+              style: const TextStyle(color: Colors.black54),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {},
-                    icon: Icon(Icons.check),
-                    label: Text("Complete"),
+                    icon: const Icon(Icons.check),
+                    label: const Text("Complete"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color(0xFF1C7259),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -250,14 +253,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {},
-                    icon: Icon(Icons.remove_red_eye),
-                    label: Text("View"),
+                    icon: const Icon(Icons.remove_red_eye),
+                    label: const Text("View"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color(0xFF1C7259),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -280,9 +283,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Color getRandomColor() {
     Random random = Random();
     return Color.fromRGBO(
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
+      random.nextInt(200),
+      random.nextInt(200),
+      random.nextInt(200),
       1,
     );
   }
@@ -295,10 +298,10 @@ class _HomeScreenState extends State<HomeScreen> {
           CircleAvatar(
             radius: 35,
             backgroundColor: getRandomColor(),
-            backgroundImage: AssetImage('assets/cat1.png'),
+            backgroundImage: const AssetImage('assets/cat1.png'),
           ),
-          SizedBox(height: 5),
-          Text(name, style: TextStyle(fontSize: 12)),
+          const SizedBox(height: 5),
+          Text(name, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

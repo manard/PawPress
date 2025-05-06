@@ -256,7 +256,7 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Add delete account functionality
+                      
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300],
