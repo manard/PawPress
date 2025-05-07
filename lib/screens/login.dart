@@ -108,10 +108,8 @@ class LoginPage extends StatelessWidget {
 
                           const SizedBox(height: 10),
 
-                          // Login Button (المعدل)
                           ElevatedButton(
                             onPressed: () {
-                              // إنشاء كائن petOwner
                               petOwner owner = petOwner(
                                 username: "Manar",
                                 email: "manar@gmail.com",
@@ -121,7 +119,6 @@ class LoginPage extends StatelessWidget {
                                 imageName: 'profile.png',
                               );
 
-                              // الانتقال إلى HomeScreen مع تمرير الowner
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -153,7 +150,6 @@ class LoginPage extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          // Google Login Button
                           ElevatedButton.icon(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(

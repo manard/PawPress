@@ -3,7 +3,7 @@ import 'package:pawpress/widgets/bottom_nav_bar.dart';
 import 'package:pawpress/widgets/top_nav_services.dart';
 
 class NearbyVetsScreen extends StatelessWidget {
-  const NearbyVetsScreen({Key? key}) : super(key: key);
+  const NearbyVetsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class NearbyVetsScreen extends StatelessWidget {
           // Background map image
           Positioned.fill(
             child: Image.asset(
-              'mapImage.jpeg', // Make sure this image exists in your assets
+              'assets/mapImage.jpeg', // Make sure this image exists in your assets
               fit: BoxFit.cover,
             ),
           ),
@@ -39,7 +39,7 @@ class NearbyVetsScreen extends StatelessWidget {
                 top: offset.dy,
                 left: offset.dx,
                 child: Image.asset(
-                  'paw.png', // Make sure this image exists in your assets
+                  'assets/paw.png', // Make sure this image exists in your assets
                   width: 40,
                   height: 40,
                 ),
