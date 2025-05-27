@@ -1,11 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
-import 'package:pawpress/screens/signupVet.dart';
 import 'package:pawpress/screens/signup.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> loginUser() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter both username and password'),
+        ),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://192.168.0.113:3000/login'); // عدلي الرابط
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 &&
+          data['user'] != null &&
+          data['role']?.toString() == 'pet_owner') {
+        print('############Login successful for user: ${data['user']}');
+        if (data['role'] == 'pet_owner') {
+          print('**********Login successful for user: ${data['user']}');
+          final owner = petOwner.fromJson(data['user']);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
+          );
+          // print('Login successful for user: ${data['user']}');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Only pet owners can log in from here'),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Login failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +82,8 @@ class LoginPage extends StatelessWidget {
             Column(
               children: [
                 const SizedBox(height: 20),
-
-                // CouchGuy Image
                 Image.asset('assets/couchguy.png', width: 250),
-
                 const SizedBox(height: 10),
-
-                // Card
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -49,8 +109,6 @@ class LoginPage extends StatelessWidget {
                       child: Column(
                         children: [
                           const SizedBox(height: 10),
-
-                          // Login Title
                           const Text(
                             'Login',
                             style: TextStyle(
@@ -59,11 +117,9 @@ class LoginPage extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Username Field
                           TextField(
+                            controller: _usernameController,
                             decoration: InputDecoration(
                               hintText: 'Username',
                               filled: true,
@@ -73,11 +129,9 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Password Field
                           TextField(
+                            controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               hintText: 'Password',
@@ -88,10 +142,7 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 10),
-
-                          // Forgot Password
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
@@ -105,28 +156,9 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 10),
-
                           ElevatedButton(
-                            onPressed: () {
-                              petOwner owner = petOwner(
-                                username: "Manar",
-                                email: "manar@gmail.com",
-                                password: "123",
-                                address: "qalandia",
-                                phoneNumber: 123456,
-                                imageName: 'profile.png',
-                              );
-
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => HomeScreen(owner: owner),
-                                ),
-                              );
-                            },
+                            onPressed: loginUser,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF87C5FF),
                               foregroundColor: Colors.white,
@@ -147,9 +179,7 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
                           ElevatedButton.icon(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
@@ -174,10 +204,7 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const Spacer(),
-
-                          // Sign Up text
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -243,23 +270,14 @@ class LoginPage extends StatelessWidget {
                                   );
 
                                   if (selectedRole != null) {
-                                    if (selectedRole == 'pet_owner') {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => const SignUpPage(),
-                                        ),
-                                      );
-                                    } else if (selectedRole == 'vet') {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => const SignUpVet(),
-                                        ),
-                                      );
-                                    }
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) =>
+                                                SignUpPage(role: selectedRole),
+                                      ),
+                                    );
                                   }
                                 },
                                 child: const Text(
@@ -279,8 +297,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Skip button at top right
             Positioned(
               top: 10,
               right: 10,

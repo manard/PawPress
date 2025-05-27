@@ -1,11 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:pawpress/screens/login.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'login.dart';
 
 class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
+  final String role;
+  const SignUpPage({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
+    final firstNameController = TextEditingController();
+    final lastNameController = TextEditingController();
+    final usernameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final phoneController = TextEditingController();
+    final addressController = TextEditingController();
+
+    Future<void> signUp() async {
+      try {
+        final response = await http.post(
+          Uri.parse('http://192.168.0.113:3000/signup'),
+          headers: {"Content-Type": "application/json"},
+          body: json.encode({
+            'firstName': firstNameController.text,
+            'lastName': lastNameController.text,
+            'username': usernameController.text,
+            'email': emailController.text,
+            'password': passwordController.text,
+            'phoneNumber': phoneController.text,
+            'address': addressController.text,
+            'role': role,
+          }),
+        );
+        print("ROLE being sent: $role");
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Signed up successfully")),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          final errorMsg =
+              response.body.isNotEmpty ? response.body : 'Unknown error';
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Signup failed: $errorMsg")));
+        }
+      } catch (e) {
+        // لو صار خطأ في الاتصال أو شيء غير متوقع
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -13,16 +65,8 @@ class SignUpPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
-              // CouchGuy Image
-              Image.asset(
-                'assets/couchguy.png',
-                width: 230,
-              ),
-
+              Image.asset('assets/couchguy.png', width: 230),
               const SizedBox(height: 10),
-
-              // Card
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -47,8 +91,6 @@ class SignUpPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-
-                      // Signup Title
                       const Text(
                         'Sign Up',
                         style: TextStyle(
@@ -57,11 +99,33 @@ class SignUpPage extends StatelessWidget {
                           color: Colors.white,
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
-                      // Username Field
                       TextField(
+                        controller: firstNameController,
+                        decoration: InputDecoration(
+                          hintText: 'First Name',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      TextField(
+                        controller: lastNameController,
+                        decoration: InputDecoration(
+                          hintText: 'Last Name',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      TextField(
+                        controller: usernameController,
                         decoration: InputDecoration(
                           hintText: 'Username',
                           filled: true,
@@ -71,11 +135,9 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
-
-                      // Email Field
                       TextField(
+                        controller: emailController,
                         decoration: InputDecoration(
                           hintText: 'Email',
                           filled: true,
@@ -85,11 +147,9 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
-
-                      // Password Field
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: 'Password',
@@ -100,11 +160,9 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
-
-                      // Phone Number Field
                       TextField(
+                        controller: phoneController,
                         decoration: InputDecoration(
                           hintText: 'Phone Number',
                           filled: true,
@@ -114,11 +172,9 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 25),
-
-                      // Address Field
                       TextField(
+                        controller: addressController,
                         decoration: InputDecoration(
                           hintText: 'Address',
                           filled: true,
@@ -128,14 +184,11 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 30),
-
-                      // Signup Button
                       SizedBox(
                         width: 280,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: signUp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF87C5FF),
                             foregroundColor: Colors.white,
@@ -154,41 +207,7 @@ class SignUpPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
-                      // Signup with Google Button
-                      SizedBox(
-                        width: 280,
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 6,
-                            side: const BorderSide(color: Colors.white),
-                          ),
-                          icon: Image.asset(
-                            'assets/google.png',
-                            height: 24,
-                          ),
-                          label: const Text(
-                            'Sign Up with Google',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Already have an account? Login
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -198,10 +217,11 @@ class SignUpPage extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              // Navigate to login page
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
                               );
                             },
                             child: const Text(
