@@ -1,19 +1,22 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pawpress/models/petOwner.dart';
+import 'package:pawpress/models/Pet.dart';
 import 'package:pawpress/screens/EditOwnerProfile.dart';
+import 'package:pawpress/screens/AddPet.dart';
+import 'package:pawpress/screens/PetDetailsScreen.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/widgets/bottom_nav_bar.dart';
 
-class OwnerProfileScreen extends StatefulWidget {
+class OwnerProfile extends StatefulWidget {
   final petOwner owner;
-  const OwnerProfileScreen({super.key, required this.owner});
+  const OwnerProfile({super.key, required this.owner});
 
   @override
-  State<OwnerProfileScreen> createState() => _ProfileScreenState();
+  State<OwnerProfile> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<OwnerProfileScreen> {
+class _ProfileScreenState extends State<OwnerProfile> {
   Map<String, bool> isExpanded = {
     'username': false,
     'email': false,
@@ -22,31 +25,31 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
     'address': false,
   };
 
-  List<Color> petColors = [];
   int _currentIndex = 0;
+  final Random _random = Random();
+  List<Color> _petBorderColors = [];
 
   @override
   void initState() {
     super.initState();
-    generateRandomColors();
+    _generateRandomLightColors();
   }
 
-  void generateRandomColors() {
-    Random random = Random();
-    petColors = List.generate(
-      5,
-      (index) => Color.fromARGB(
-        255,
-        random.nextInt(256),
-        random.nextInt(256),
-        random.nextInt(256),
-      ),
+  void _generateRandomLightColors() {
+    _petBorderColors = List.generate(5, (index) => _getRandomLightColor());
+  }
+
+  Color _getRandomLightColor() {
+    return Color.fromRGBO(
+      150 + _random.nextInt(100),
+      150 + _random.nextInt(100),
+      150 + _random.nextInt(100),
+      1,
     );
   }
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      // Go to Home
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -54,7 +57,6 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
         ),
       );
     } else if (index == 2) {
-      // Go to Store
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -66,10 +68,183 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
         ),
       );
     }
-    // If index is 0 (Profile), stay on current page
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  Widget _petAvatar(Pet pet, Color borderColor) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 15),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PetDetailsScreen(pet: pet),
+                ),
+              );
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: borderColor, width: 3),
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  pet.image,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          const Icon(Icons.pets, size: 40, color: Colors.grey),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            pet.name,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF2C3E50),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPetsList() {
+    List<Pet> pets = widget.owner.pets;
+
+    // إذا القائمة فاضية، نضيف حيوانات وهمية للتجربة
+    if (pets.isEmpty) {
+      pets = [
+        Pet(
+          name: "Bella",
+          image: "assets/cat1.png",
+          petID: 1,
+          ownerID: 1,
+          age: 1,
+          breed: 'dd',
+          gender: 'f',
+        ),
+        Pet(
+          name: "Suzy",
+          image: "assets/cat1.png",
+          petID: 1,
+          ownerID: 1,
+          age: 1,
+          breed: 'dd',
+          gender: 'f',
+        ),
+      ];
+    }
+
+    return SizedBox(
+      height: 110,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        children: [
+          // زر الإضافة
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddPet(owner: widget.owner),
+                ),
+              );
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              margin: const EdgeInsets.only(right: 15),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blue[100],
+                border: Border.all(color: Colors.blue, width: 2),
+              ),
+              child: const Icon(Icons.add, color: Colors.blue, size: 30),
+            ),
+          ),
+
+          // عرض الحيوانات
+          ...pets.map(
+            (pet) => _petAvatar(
+              pet,
+              _petBorderColors[pets.indexOf(pet) % _petBorderColors.length],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildExpandableField(
+    IconData icon,
+    String label,
+    String value,
+    String keyName,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            height: 55,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black26),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: Colors.black45),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(color: Colors.black45, fontSize: 16),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    isExpanded[keyName]!
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 24,
+                    color: Colors.black45,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isExpanded[keyName] = !(isExpanded[keyName] ?? false);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          if (isExpanded[keyName] == true) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -98,10 +273,12 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
                     children: [
                       Stack(
                         children: [
-                          CircleAvatar(
+                          const CircleAvatar(
                             radius: 50,
+
                             backgroundImage: AssetImage("assets/profile.png"),
                           ),
+
                           Positioned(
                             bottom: 0,
                             right: 4,
@@ -170,8 +347,8 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "My Pets",
                     style: TextStyle(
                       fontSize: 18,
@@ -179,28 +356,16 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
                       color: Colors.blue,
                     ),
                   ),
-                  Text(
-                    "See all",
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
+                  if (widget.owner.pets.isNotEmpty)
+                    Text(
+                      "${widget.owner.pets.length} Pets",
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 90,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  buildAddPetButton(petColors[0]),
-                  buildPetImage('assets/cat1.png', petColors[1]),
-                  buildPetImage('assets/cat1.png', petColors[2]),
-                  buildPetImage('assets/cat1.png', petColors[3]),
-                  buildPetImage('assets/cat1.png', petColors[4]),
-                ],
-              ),
-            ),
+            const SizedBox(height: 15),
+            _buildPetsList(),
             const SizedBox(height: 20),
             buildExpandableField(
               Icons.person,
@@ -223,7 +388,7 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
             buildExpandableField(
               Icons.phone,
               "Mobile Number",
-              widget.owner.phoneNumber.toString(),
+              widget.owner.phoneNumber,
               'phone',
             ),
             buildExpandableField(
@@ -256,7 +421,7 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      
+                      // TODO: Delete account functionality
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300],
@@ -280,89 +445,6 @@ class _ProfileScreenState extends State<OwnerProfileScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
-      ),
-    );
-  }
-
-  Widget buildPetImage(String imagePath, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: ClipOval(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Image.asset(imagePath, fit: BoxFit.cover),
-        ),
-      ),
-    );
-  }
-
-  Widget buildAddPetButton(Color color) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: const Icon(Icons.add, size: 36, color: Colors.white),
-    );
-  }
-
-  Widget buildExpandableField(
-    IconData icon,
-    String label,
-    String value,
-    String keyName,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            height: 55,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black26),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: Colors.black45),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: const TextStyle(color: Colors.black45, fontSize: 16),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.black26,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isExpanded[keyName] = !(isExpanded[keyName] ?? false);
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          if (isExpanded[keyName] == true) ...[
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: Text(
-                value,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }
