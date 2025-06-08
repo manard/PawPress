@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pawpress/models/petOwner.dart';
-import 'package:pawpress/models/product.dart';
+import 'package:pawpress/models/Product.dart';
 import 'package:pawpress/screens/ProductDetailsPage.dart';
 import 'package:pawpress/widgets/headerPages.dart';
 import 'package:pawpress/widgets/bottom_nav_bar.dart';
@@ -23,13 +25,19 @@ class MarketPlacePage extends StatefulWidget {
 
 class _MarketPlacePageState extends State<MarketPlacePage> {
   int _currentIndex = 2;
+  List<Product> _products = [];
+  bool _isLoading = true;
+
+  int _selectedCategoryIndex = -1;
+
+  final List<String> categories = ['Food', 'Toys', 'Accessories', 'Medicine'];
 
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => OwnerProfileScreen(owner: widget.owner),
+          builder: (context) => OwnerProfile(owner: widget.owner),
         ),
       );
     } else if (index == 1) {
@@ -46,42 +54,39 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
     }
   }
 
-  final List<String> categories = ['Food', 'Toys', 'Accessories', 'Medicine'];
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
 
-  final List<Product> popularProducts = [
-    Product(
-      productId: 1,
-      productName: 'Cat Food',
-      price: 12.0,
-      description: 'Nutritious food for cats.',
-      quantity: 10,
-      imagePath: 'assets/catFood.png',
-    ),
-    Product(
-      productId: 2,
-      productName: 'Dog Toy',
-      price: 8.0,
-      description: 'Durable rubber toy for dogs.',
-      quantity: 15,
-      imagePath: 'assets/dogToy.png',
-    ),
-    Product(
-      productId: 3,
-      productName: 'Bird Cage',
-      price: 30.0,
-      description: 'Spacious cage for birds.',
-      quantity: 5,
-      imagePath: 'assets/Bird.png',
-    ),
-    Product(
-      productId: 4,
-      productName: 'Fish Medicine',
-      price: 5.0,
-      description: 'Anti-bacterial treatment for fish.',
-      quantity: 20,
-      imagePath: 'assets/Fish.png',
-    ),
-  ];
+  Future<void> fetchProducts() async {
+    final url = Uri.parse('http://192.168.0.107:3000/product');
+    try {
+      final response = await http.get(url);
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _products = data.map((item) => Product.fromJson(item)).toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        print('Error: Server responded with status ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Exception while fetching products: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +95,7 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
         child: Column(
           children: [
             HeaderWidget(pageTitle: widget.pageTitle),
-
             const SizedBox(height: 20),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Align(
@@ -107,27 +110,38 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 10),
-
             SizedBox(
               height: 45,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
+                  final isSelected = index == _selectedCategoryIndex;
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Chip(
-                      label: Text(categories[index]),
-                      backgroundColor: const Color(0xFFE7F6EF),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: ChoiceChip(
+                      label: Text(
+                        categories[index],
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.pink,
+                        ),
+                      ),
+                      selected: isSelected,
+                      selectedColor: Colors.pink,
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.pink),
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedCategoryIndex = index;
+                          // يمكن لاحقًا فلترة المنتجات حسب الفئة
+                        });
+                      },
                     ),
                   );
                 },
               ),
             ),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
               child: Align(
@@ -142,89 +156,114 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
                 ),
               ),
             ),
-
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 2 / 2.7,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: popularProducts.length,
-                itemBuilder: (context, index) {
-                  final product = popularProducts[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailsPage(
-                            product: product,
-                            owner: widget.owner,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _products.isEmpty
+                      ? const Center(child: Text("No products available."))
+                      : GridView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 2 / 3.2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
                           ),
-                        ),
-                      );
-                    },
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      color: const Color(0xFFFFF9E6),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Image.asset(
-                                product.imagePath,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              product.productName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${product.price.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Color(0xFF1C7259),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: IconButton(
-                                icon: const Icon(Icons.shopping_cart_outlined),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        '${product.productName} added to cart!',
-                                      ),
-                                      duration: const Duration(seconds: 1),
+                          itemCount: _products.length,
+                          itemBuilder: (context, index) {
+                            final product = _products[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProductDetailsPage(
+                                      product: product,
+                                      owner: widget.owner,
                                     ),
-                                  );
-                                },
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                color: const Color(0xFFFFF9E6),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                              Icons.shopping_cart_outlined),
+                                          onPressed: () {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    '${product.name} added to cart!'),
+                                                duration:
+                                                    const Duration(seconds: 1),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Center(
+                                          child:
+                                              product.productimg.isNotEmpty
+                                                  ? Image.network(
+                                                      product.productimg,
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder: (context,
+                                                              error,
+                                                              stackTrace) =>
+                                                          const Icon(Icons
+                                                              .broken_image),
+                                                    )
+                                                  : const Icon(Icons
+                                                      .image_not_supported),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              product.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            '\$${product.price.toStringAsFixed(2)}',
+                                            style: const TextStyle(
+                                              color: Color(0xFF1C7259),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
           ],
         ),

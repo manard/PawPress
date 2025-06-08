@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpress/models/product.dart';
+import 'package:pawpress/models/Product.dart';
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/OwnerProfile.dart';
@@ -32,7 +32,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => OwnerProfileScreen(owner: widget.owner),
+          builder: (context) => OwnerProfile(owner: widget.owner),
         ),
       );
     } else if (index == 1) {
@@ -66,10 +66,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 height: 250,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFF1e96fc),
-                    width: 2,
-                  ),
+                  border: Border.all(color: const Color(0xFF1e96fc), width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.blue.withOpacity(0.05),
@@ -82,10 +79,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   borderRadius: BorderRadius.circular(18),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Image.asset(
-                      product.imagePath,
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.asset(product.productimg, fit: BoxFit.contain),
                   ),
                 ),
               ),
@@ -95,7 +89,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 child: Column(
                   children: [
                     Text(
-                      product.productName,
+                      product.name,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -115,7 +109,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD8EDFF),
                         borderRadius: BorderRadius.circular(10),
@@ -143,7 +139,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     const SizedBox(height: 25),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF2F8FF),
                         borderRadius: BorderRadius.circular(30),
@@ -152,14 +150,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: quantity > 1
-                                ? () => setState(() => quantity--)
-                                : null,
+                            onPressed:
+                                quantity > 1
+                                    ? () => setState(() => quantity--)
+                                    : null,
                             icon: Icon(
                               Icons.remove_circle_outline,
-                              color: quantity > 1
-                                  ? const Color(0xFF1e96fc)
-                                  : Colors.grey,
+                              color:
+                                  quantity > 1
+                                      ? const Color(0xFF1e96fc)
+                                      : Colors.grey,
                             ),
                           ),
                           Container(
@@ -168,7 +168,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             child: Text(
                               quantity.toString(),
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -192,20 +194,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 16),
+                            horizontal: 30,
+                            vertical: 16,
+                          ),
                           elevation: 3,
                         ),
                         icon: const Icon(Icons.shopping_cart),
                         label: const Text(
                           'Add To Cart',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                  '${product.productName} added to cart!'),
+                              content: Text('${product.name} added to cart!'),
                               behavior: SnackBarBehavior.floating,
                               backgroundColor: const Color(0xFF1e96fc),
                               shape: RoundedRectangleBorder(

@@ -1,3 +1,5 @@
+import 'package:pawpress/models/Pet.dart';
+
 class petOwner {
   final String username;
   final String firstName;
@@ -8,8 +10,10 @@ class petOwner {
   final String phoneNumber;
   // String imageName; //should be imageUrl for firbase
   String role;
+  final List<Pet> pets;
 
-  petOwner({
+  petOwner(
+    this.pets, {
     required this.username,
     required this.email,
     required this.password,
@@ -22,7 +26,12 @@ class petOwner {
   });
 
   factory petOwner.fromJson(Map<String, dynamic> json) {
+    var petsJson = json['pets'] as List<dynamic>? ?? [];
+    List<Pet> petsList =
+        petsJson.map((petJson) => Pet.fromJson(petJson)).toList();
+
     return petOwner(
+      petsList,
       username: json['username'] ?? '',
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
@@ -30,7 +39,6 @@ class petOwner {
       phoneNumber: json['phoneNumber'] ?? '',
       address: json['address'] ?? '',
       password: json['password'] ?? '',
-      // imageName: json['imageName'],
       role: json['role'] ?? '',
     );
   }

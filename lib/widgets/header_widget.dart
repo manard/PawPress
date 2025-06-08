@@ -12,7 +12,7 @@ class HeaderWidget extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 120, 179, 224),
+        color: Color(0xFFb392ac),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),

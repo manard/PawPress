@@ -22,9 +22,7 @@ app.post('/signup', (req, res) => {
   });
 });
 //Login
-app.listen(3000,'0.0.0.0', () => {
-  console.log('Server running on http://localhost:3000');
-});
+app.listen(3000, '0.0.0.0', () => console.log("Server running on port 3000"));
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -60,3 +58,15 @@ app.post('/login', (req, res) => {
     }
   });
 });
+//to fetch product
+app.get('/product', (req, res) => {
+  db.query('SELECT * FROM product', (err, results) => {
+    if (err) {
+      console.error('Error retrieving product:', err);
+      return res.status(500).json({ message: 'Error retrieving product' });
+    }
+
+    res.json(results); // ✅ رجعي النتائج مباشرة
+  });
+});
+
