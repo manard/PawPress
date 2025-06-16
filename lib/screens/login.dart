@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/signup.dart';
+import 'package:pawpress/screens/signupVet.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.107:3000/login'); 
+    final url = Uri.parse('http://localhost:3000/login');
 
     try {
       final response = await http.post(
@@ -275,7 +276,11 @@ class _LoginPageState extends State<LoginPage> {
                                       MaterialPageRoute(
                                         builder:
                                             (context) =>
-                                                SignUpPage(role: selectedRole),
+                                                selectedRole == 'vet'
+                                                    ? const SignUpVet()
+                                                    : SignUpPage(
+                                                      role: 'pet_owner',
+                                                    ),
                                       ),
                                     );
                                   }

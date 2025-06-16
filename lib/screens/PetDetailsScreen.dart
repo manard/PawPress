@@ -4,7 +4,7 @@ import 'package:pawpress/models/Pet.dart';
 class PetDetailsScreen extends StatelessWidget {
   final Pet pet;
 
-  PetDetailsScreen({required this.pet});
+  const PetDetailsScreen({super.key, required this.pet});
 
   @override
   Widget build(BuildContext context) {

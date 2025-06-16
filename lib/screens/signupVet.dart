@@ -1,8 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:pawpress/screens/login.dart';
 
-class SignUpVet extends StatelessWidget {
+class SignUpVet extends StatefulWidget {
   const SignUpVet({super.key});
+
+  @override
+  State<SignUpVet> createState() => _SignUpVetState();
+}
+
+class _SignUpVetState extends State<SignUpVet> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController specializationController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  
+
+  void signUpVet() async {
+    const url = 'http://localhost:3000/signupVet'; // Change to your backend endpoint
+
+   
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'username': usernameController.text,
+        'email': emailController.text,
+        'phoneNumber': phoneController.text,
+        'address': addressController.text,
+        'specialization': specializationController.text,
+        'password': passwordController.text,
+        'role': 'vet',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Vet signed up successfully!")),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Sign up failed: ${response.body}")),
+      );
+    }
+  }
+
+
+  Widget buildTextField(String hint, TextEditingController controller, {bool obscure = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 25),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +87,6 @@ class SignUpVet extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
 
-              // CouchGuy Image
               Image.asset(
                 'assets/couchguy.png',
                 width: 230,
@@ -22,7 +94,6 @@ class SignUpVet extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Card
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -48,9 +119,8 @@ class SignUpVet extends StatelessWidget {
                     children: [
                       const SizedBox(height: 10),
 
-                      // Signup Title
                       const Text(
-                        'Sign Up VETT',
+                        'Vet Sign Up',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -60,82 +130,22 @@ class SignUpVet extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Username Field
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Username',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Email Field
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Password Field
-                      TextField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Phone Number Field
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Phone Number',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // Address Field
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Address',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
+                      buildTextField('First Name', firstNameController),
+                      buildTextField('Last Name', lastNameController),
+                      buildTextField('Username', usernameController),
+                      buildTextField('Email', emailController),
+                      buildTextField('Phone Number', phoneController),
+                      buildTextField('Address', addressController),
+                      buildTextField('Specialization', specializationController),
+                      buildTextField('Password', passwordController, obscure: true),
+                      
 
                       const SizedBox(height: 30),
 
-                      // Signup Button
                       SizedBox(
                         width: 280,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: signUpVet,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF87C5FF),
                             foregroundColor: Colors.white,
@@ -157,7 +167,6 @@ class SignUpVet extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Signup with Google Button
                       SizedBox(
                         width: 280,
                         child: ElevatedButton.icon(
@@ -188,7 +197,6 @@ class SignUpVet extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Already have an account? Login
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -198,10 +206,11 @@ class SignUpVet extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              // Navigate to login page
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
                               );
                             },
                             child: const Text(

@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pawpress/models/petOwner.dart';
-import 'package:pawpress/screens/home_page.dart';
-import 'package:pawpress/screens/OwnerProfile.dart';
 import 'package:pawpress/widgets/bottom_nav_bar.dart';
 import 'package:pawpress/screens/Welcome.dart';
 

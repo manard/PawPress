@@ -61,7 +61,7 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
   }
 
   Future<void> fetchProducts() async {
-    final url = Uri.parse('http://192.168.0.107:3000/product');
+    final url = Uri.parse('http://192.168.1.30:3000/product');
     try {
       final response = await http.get(url);
 

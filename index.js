@@ -70,3 +70,68 @@ app.get('/product', (req, res) => {
   });
 });
 
+app.post('/signupVet', (req, res) => {
+  console.log('Received vet signup:', req.body);
+  const { username, email, password, firstName, lastName, phoneNumber, role, address, specialization } = req.body;
+
+  // Step 1: Insert into appuser
+  const userSql = `
+    INSERT INTO appuser (username, email, password, firstName, lastName, phoneNumber, role, address)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const userValues = [username, email, password, firstName, lastName, phoneNumber, role, address];
+
+  console.log('Executing SQL:', userSql, 'with values:', userValues);
+
+  db.query(userSql, userValues, (err, result) => {
+    if (err) {
+      console.error('Detailed appuser error:', {
+        code: err.code,
+        errno: err.errno,
+        sqlMessage: err.sqlMessage,
+        sqlState: err.sqlState,
+        sql: err.sql
+      });
+      return res.status(500).json({ 
+        message: 'Database error during vet signup (appuser)',
+        error: err.sqlMessage || err.message,
+        code: err.code
+      });
+    }
+
+    const userId = result.insertId;
+    console.log('Successfully inserted user with ID:', userId);
+
+    // Step 2: Insert into vet table
+    const vetSql = `
+      INSERT INTO vet (userID, specialization)
+      VALUES (?, ?)
+    `;
+    const vetValues = [userId, specialization];
+
+    console.log('Executing vet SQL:', vetSql, 'with values:', vetValues);
+
+    db.query(vetSql, vetValues, (err2, result2) => {
+      if (err2) {
+        console.error('Detailed vet error:', {
+          code: err2.code,
+          errno: err2.errno,
+          sqlMessage: err2.sqlMessage,
+          sqlState: err2.sqlState,
+          sql: err2.sql
+        });
+        return res.status(500).json({ 
+          message: 'Database error during vet signup (vet)',
+          error: err2.sqlMessage || err2.message,
+          code: err2.code
+        });
+      }
+
+      console.log('Successfully inserted vet with userID:', userId);
+      res.status(200).json({ 
+        message: 'Vet registered successfully',
+        userId: userId 
+      });
+    });
+  });
+});
