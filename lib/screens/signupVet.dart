@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'dart:convert';
 
 import 'package:pawpress/screens/login.dart';
@@ -12,6 +13,7 @@ class SignUpVet extends StatefulWidget {
 }
 
 class _SignUpVetState extends State<SignUpVet> {
+  bool _usernameValid = true;
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
@@ -20,13 +22,92 @@ class _SignUpVetState extends State<SignUpVet> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController specializationController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with "vet" prefix
+    usernameController.text = 'vet';
+    usernameController.selection = TextSelection.collapsed(offset: 3);
+    usernameController.addListener(_handleUsernameChanges);
+  }
+
+  @override
+  void dispose() {
+    usernameController.removeListener(_handleUsernameChanges);
+    usernameController.dispose();
+    super.dispose();
+  }
+
+  void _handleUsernameChanges() {
+    final text = usernameController.text;
+    
+    // If user tries to delete the prefix completely
+    if (text.isEmpty) {
+      usernameController.text = 'vet';
+      usernameController.selection = TextSelection.collapsed(offset: 3);
+      return;
+    }
+    
+    // If user tries to modify the prefix
+    if (!text.startsWith('vet')) {
+      // Get only the part after any existing "vet"
+      final cleanText = text.substring(text.indexOf('vet') + 3);
+      usernameController.text = 'vet$cleanText';
+      usernameController.selection = TextSelection.collapsed(
+        offset: usernameController.text.length
+      );
+    }
+    
+    setState(() {
+      _usernameValid = usernameController.text.startsWith('vet') && 
+                      usernameController.text.length > 3;
+    });
+  }
+
+  Widget _buildUsernameField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 25),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Username',
+              style: TextStyle(
+                color: Colors.black54,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          TextFormField(
+            controller: usernameController,
+            decoration: InputDecoration(
+              hintText: 'vetusername',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              errorText: _usernameValid ? null : 'Must start with "vet" and have additional characters',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void signUpVet() async {
-    const url = 'http://localhost:3000/signupVet'; // Change to your backend endpoint
-
-   
-
+    const url = 'http://localhost:3000/signupVet';
+    if (!usernameController.text.startsWith('vet') || usernameController.text.length <= 3) {
+      setState(() => _usernameValid = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Username must start with 'vet' and have additional characters")),
+      );
+      return;
+    }
+    
     final response = await http.post(
       Uri.parse(url),
       headers: {"Content-Type": "application/json"},
@@ -58,8 +139,11 @@ class _SignUpVetState extends State<SignUpVet> {
     }
   }
 
-
-  Widget buildTextField(String hint, TextEditingController controller, {bool obscure = false}) {
+  Widget buildTextField(
+    String hint,
+    TextEditingController controller, {
+    bool obscure = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
       child: TextField(
@@ -69,9 +153,7 @@ class _SignUpVetState extends State<SignUpVet> {
           hintText: hint,
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
     );
@@ -86,12 +168,7 @@ class _SignUpVetState extends State<SignUpVet> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
-              Image.asset(
-                'assets/couchguy.png',
-                width: 230,
-              ),
-
+              Image.asset('assets/couchguy.png', width: 230),
               const SizedBox(height: 10),
 
               Container(
@@ -118,7 +195,6 @@ class _SignUpVetState extends State<SignUpVet> {
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-
                       const Text(
                         'Vet Sign Up',
                         style: TextStyle(
@@ -127,21 +203,21 @@ class _SignUpVetState extends State<SignUpVet> {
                           color: Colors.white,
                         ),
                       ),
-
                       const SizedBox(height: 20),
 
                       buildTextField('First Name', firstNameController),
                       buildTextField('Last Name', lastNameController),
-                      buildTextField('Username', usernameController),
+                      
+                      // Use the custom username field
+                      _buildUsernameField(),
+
                       buildTextField('Email', emailController),
                       buildTextField('Phone Number', phoneController),
                       buildTextField('Address', addressController),
                       buildTextField('Specialization', specializationController),
                       buildTextField('Password', passwordController, obscure: true),
-                      
 
                       const SizedBox(height: 30),
-
                       SizedBox(
                         width: 280,
                         child: ElevatedButton(
@@ -166,7 +242,6 @@ class _SignUpVetState extends State<SignUpVet> {
                       ),
 
                       const SizedBox(height: 20),
-
                       SizedBox(
                         width: 280,
                         child: ElevatedButton.icon(
@@ -181,10 +256,7 @@ class _SignUpVetState extends State<SignUpVet> {
                             elevation: 6,
                             side: const BorderSide(color: Colors.white),
                           ),
-                          icon: Image.asset(
-                            'assets/google.png',
-                            height: 24,
-                          ),
+                          icon: Image.asset('assets/google.png', height: 24),
                           label: const Text(
                             'Sign Up with Google',
                             style: TextStyle(
@@ -196,7 +268,6 @@ class _SignUpVetState extends State<SignUpVet> {
                       ),
 
                       const SizedBox(height: 20),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
