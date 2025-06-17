@@ -76,7 +76,7 @@ class _SignUpVetState extends State<SignUpVet> {
             child: Text(
               'Username',
               style: TextStyle(
-                color: Colors.black54,
+                color: Colors.black, 
                 fontSize: 16,
               ),
             ),
@@ -85,6 +85,7 @@ class _SignUpVetState extends State<SignUpVet> {
             controller: usernameController,
             decoration: InputDecoration(
               hintText: 'vetusername',
+              hintStyle: TextStyle(color: Colors.grey), 
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -146,15 +147,31 @@ class _SignUpVetState extends State<SignUpVet> {
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        decoration: InputDecoration(
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              hint,
+              style: const TextStyle(
+                color: Colors.black, 
+                fontSize: 16,
+              ),
+            ),
+          ),
+          TextField(
+            controller: controller,
+            obscureText: obscure,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey), 
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -196,7 +213,7 @@ class _SignUpVetState extends State<SignUpVet> {
                     children: [
                       const SizedBox(height: 10),
                       const Text(
-                        'Vet Sign Up',
+                        'Sign Up As Vet',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -205,8 +222,78 @@ class _SignUpVetState extends State<SignUpVet> {
                       ),
                       const SizedBox(height: 20),
 
-                      buildTextField('First Name', firstNameController),
-                      buildTextField('Last Name', lastNameController),
+                      // First and Last Name in a Row
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 25),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        'First Name',
+                                        style: TextStyle(
+                                          color: Colors.black, // Changed to black
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    TextField(
+                                      controller: firstNameController,
+                                      decoration: InputDecoration(
+                                        hintText: 'First Name',
+                                        hintStyle: TextStyle(color: Colors.grey), // Added gray hint
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        'Last Name',
+                                        style: TextStyle(
+                                          color: Colors.black, // Changed to black
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    TextField(
+                                      controller: lastNameController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Last Name',
+                                        hintStyle: TextStyle(color: Colors.grey), // Added gray hint
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       
                       // Use the custom username field
                       _buildUsernameField(),
