@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'dart:convert';
-
 import 'package:pawpress/screens/login.dart';
 
 class SignUpVet extends StatefulWidget {
@@ -21,12 +20,46 @@ class _SignUpVetState extends State<SignUpVet> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController specializationController = TextEditingController();
+  final TextEditingController otherSpecializationController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  // Validation flags
+  bool _firstNameValid = true;
+  bool _lastNameValid = true;
+  bool _emailValid = true;
+  bool _phoneValid = true;
+  bool _addressValid = true;
+  bool _specializationValid = true;
+  bool _otherSpecializationValid = true;
+  bool _passwordValid = true;
+  bool _showOtherSpecialization = false;
+
+  final List<String> specializations = [
+    'Small Animal Medicine',
+    'Large Animal Medicine',
+    'Exotic Animal Medicine',
+    'Equine Medicine',
+    'Internal Medicine',
+    'Surgery',
+    'Dermatology',
+    'Dentistry',
+    'Ophthalmology',
+    'Anesthesiology',
+    'Radiology (Diagnostic Imaging)',
+    'Emergency and Critical Care',
+    'Preventive Medicine',
+    'Behavior',
+    'Nutrition',
+    'Reproduction (Theriogenology)',
+    'Wildlife/Zoo Medicine',
+    'Public Health',
+    'Alternative Medicine',
+    'Other',
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Initialize with "vet" prefix
     usernameController.text = 'vet';
     usernameController.selection = TextSelection.collapsed(offset: 3);
     usernameController.addListener(_handleUsernameChanges);
@@ -42,16 +75,13 @@ class _SignUpVetState extends State<SignUpVet> {
   void _handleUsernameChanges() {
     final text = usernameController.text;
     
-    // If user tries to delete the prefix completely
     if (text.isEmpty) {
       usernameController.text = 'vet';
       usernameController.selection = TextSelection.collapsed(offset: 3);
       return;
     }
     
-    // If user tries to modify the prefix
     if (!text.startsWith('vet')) {
-      // Get only the part after any existing "vet"
       final cleanText = text.substring(text.indexOf('vet') + 3);
       usernameController.text = 'vet$cleanText';
       usernameController.selection = TextSelection.collapsed(
@@ -65,7 +95,87 @@ class _SignUpVetState extends State<SignUpVet> {
     });
   }
 
+  bool _validateFields() {
+    bool isValid = true;
+    
+    // Name validation (only letters)
+    final nameRegex = RegExp(r'^[a-zA-Z]+$');
+    _firstNameValid = nameRegex.hasMatch(firstNameController.text.trim());
+    _lastNameValid = nameRegex.hasMatch(lastNameController.text.trim());
+    
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    _emailValid = emailRegex.hasMatch(emailController.text.trim());
+    
+    // Phone validation (only numbers)
+    final phoneRegex = RegExp(r'^[0-9]+$');
+    _phoneValid = phoneRegex.hasMatch(phoneController.text.trim());
+    
+    // Address validation (not empty)
+    _addressValid = addressController.text.trim().isNotEmpty;
+    
+    // Specialization validation
+    _specializationValid = specializationController.text.trim().isNotEmpty;
+    
+    // Password validation (min 6 characters)
+    _passwordValid = passwordController.text.trim().length >= 6;
+    
+    // Other specialization validation if shown
+    if (_showOtherSpecialization) {
+      _otherSpecializationValid = otherSpecializationController.text.trim().isNotEmpty;
+      if (!_otherSpecializationValid) isValid = false;
+    }
+    
+    if (!_firstNameValid || 
+        !_lastNameValid || 
+        !_emailValid || 
+        !_phoneValid || 
+        !_addressValid || 
+        !_specializationValid || 
+        !_passwordValid) {
+      isValid = false;
+    }
+    
+    setState(() {});
+    
+    return isValid;
+  }
+
   Widget _buildUsernameField() {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 25),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            'Username',
+            style: TextStyle(
+              color: Colors.black, 
+              fontSize: 16,
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: usernameController,
+          decoration: InputDecoration(
+            hintText: 'vetusername',
+            hintStyle: TextStyle(color: Colors.grey), 
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            errorText: _usernameValid ? null : 'Must start with "vet" and have additional characters',
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  Widget _buildSpecializationField() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
       child: Column(
@@ -74,76 +184,86 @@ class _SignUpVetState extends State<SignUpVet> {
           const Padding(
             padding: EdgeInsets.only(bottom: 8.0),
             child: Text(
-              'Username',
+              'Specialization',
               style: TextStyle(
                 color: Colors.black, 
                 fontSize: 16,
               ),
             ),
           ),
-          TextFormField(
-            controller: usernameController,
+          DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              hintText: 'vetusername',
-              hintStyle: TextStyle(color: Colors.grey), 
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              errorText: _usernameValid ? null : 'Must start with "vet" and have additional characters',
+              errorText: !_specializationValid ? 'Please select a specialization' : null,
             ),
+            value: specializationController.text.isEmpty ? null : specializationController.text,
+            items: specializations.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                specializationController.text = newValue ?? '';
+                _showOtherSpecialization = newValue == 'Other';
+                if (!_showOtherSpecialization) {
+                  otherSpecializationController.clear();
+                }
+                _otherSpecializationValid = true;
+              });
+            },
+            hint: const Text('Select Specialization'),
           ),
+          if (_showOtherSpecialization)
+            Padding(
+              padding: const EdgeInsets.only(top: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Specify your specialization',
+                      style: TextStyle(
+                        color: Colors.black, 
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  TextField(
+                    controller: otherSpecializationController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your specialization',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      errorText: !_otherSpecializationValid ? 'Please specify your specialization' : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
-  }
-
-  void signUpVet() async {
-    const url = 'http://localhost:3000/signupVet';
-    if (!usernameController.text.startsWith('vet') || usernameController.text.length <= 3) {
-      setState(() => _usernameValid = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Username must start with 'vet' and have additional characters")),
-      );
-      return;
-    }
-    
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({
-        'firstName': firstNameController.text,
-        'lastName': lastNameController.text,
-        'username': usernameController.text,
-        'email': emailController.text,
-        'phoneNumber': phoneController.text,
-        'address': addressController.text,
-        'specialization': specializationController.text,
-        'password': passwordController.text,
-        'role': 'vet',
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vet signed up successfully!")),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Sign up failed: ${response.body}")),
-      );
-    }
   }
 
   Widget buildTextField(
     String hint,
     TextEditingController controller, {
     bool obscure = false,
+    bool? isValid,
+    String? errorText,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
@@ -163,17 +283,85 @@ class _SignUpVetState extends State<SignUpVet> {
           TextField(
             controller: controller,
             obscureText: obscure,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey), 
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              errorText: (isValid != null && !isValid) ? errorText ?? 'Invalid input' : null,
             ),
           ),
         ],
       ),
     );
+  }
+
+  void signUpVet() async {
+    if (!_validateFields()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please correct the errors in the form"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (!usernameController.text.startsWith('vet') || usernameController.text.length <= 3) {
+      setState(() => _usernameValid = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Username must start with 'vet' and have additional characters"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    String finalSpecialization = specializationController.text;
+    if (finalSpecialization == 'Other' && otherSpecializationController.text.isNotEmpty) {
+      finalSpecialization = otherSpecializationController.text;
+    }
+    
+    const url = 'http://localhost:3000/signupVet';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'username': usernameController.text,
+        'email': emailController.text,
+        'phoneNumber': phoneController.text,
+        'address': addressController.text,
+        'specialization': finalSpecialization,
+        'password': passwordController.text,
+        'role': 'vet',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Vet signed up successfully!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Sign up failed: ${response.body}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -238,21 +426,25 @@ class _SignUpVetState extends State<SignUpVet> {
                                       child: Text(
                                         'First Name',
                                         style: TextStyle(
-                                          color: Colors.black, // Changed to black
+                                          color: Colors.black,
                                           fontSize: 16,
                                         ),
                                       ),
                                     ),
                                     TextField(
                                       controller: firstNameController,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                                      ],
                                       decoration: InputDecoration(
                                         hintText: 'First Name',
-                                        hintStyle: TextStyle(color: Colors.grey), // Added gray hint
+                                        hintStyle: TextStyle(color: Colors.grey),
                                         filled: true,
                                         fillColor: Colors.white,
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(15),
                                         ),
+                                        errorText: !_firstNameValid ? 'Only alphabetic characters allowed' : null,
                                       ),
                                     ),
                                   ],
@@ -270,21 +462,25 @@ class _SignUpVetState extends State<SignUpVet> {
                                       child: Text(
                                         'Last Name',
                                         style: TextStyle(
-                                          color: Colors.black, // Changed to black
+                                          color: Colors.black,
                                           fontSize: 16,
                                         ),
                                       ),
                                     ),
                                     TextField(
                                       controller: lastNameController,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                                      ],
                                       decoration: InputDecoration(
                                         hintText: 'Last Name',
-                                        hintStyle: TextStyle(color: Colors.grey), // Added gray hint
+                                        hintStyle: TextStyle(color: Colors.grey),
                                         filled: true,
                                         fillColor: Colors.white,
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(15),
                                         ),
+                                        errorText: !_lastNameValid ? 'Only alphabetic characters allowed' : null,
                                       ),
                                     ),
                                   ],
@@ -295,14 +491,43 @@ class _SignUpVetState extends State<SignUpVet> {
                         ),
                       ),
                       
-                      // Use the custom username field
                       _buildUsernameField(),
 
-                      buildTextField('Email', emailController),
-                      buildTextField('Phone Number', phoneController),
-                      buildTextField('Address', addressController),
-                      buildTextField('Specialization', specializationController),
-                      buildTextField('Password', passwordController, obscure: true),
+                      buildTextField(
+                        'Email', 
+                        emailController, 
+                        isValid: _emailValid,
+                        errorText: 'Please enter a valid email',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      
+                      buildTextField(
+                        'Phone Number', 
+                        phoneController, 
+                        isValid: _phoneValid,
+                        errorText: 'Only numbers allowed',
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                      
+                      buildTextField(
+                        'Address', 
+                        addressController, 
+                        isValid: _addressValid,
+                        errorText: 'Please enter your address',
+                      ),
+                      
+                      _buildSpecializationField(),
+                      
+                      buildTextField(
+                        'Password', 
+                        passwordController, 
+                        obscure: true, 
+                        isValid: _passwordValid,
+                        errorText: 'Password must be at least 6 characters',
+                      ),
 
                       const SizedBox(height: 30),
                       SizedBox(
