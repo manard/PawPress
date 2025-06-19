@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/signup.dart';
+import 'package:pawpress/api_config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.107:3000/login'); 
+    final url = Uri.parse('${ApiConfig.baseURL}/login');
 
     try {
       final response = await http.post(
@@ -44,22 +46,17 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200 &&
           data['user'] != null &&
           data['role']?.toString() == 'pet_owner') {
-        print('############Login successful for user: ${data['user']}');
-        if (data['role'] == 'pet_owner') {
-          print('**********Login successful for user: ${data['user']}');
-          final owner = petOwner.fromJson(data['user']);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
-          );
-          // print('Login successful for user: ${data['user']}');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Only pet owners can log in from here'),
-            ),
-          );
-        }
+        final userID = data['user']['userID'];
+
+        // Save userID in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('userID', userID);
+
+        final owner = petOwner.fromJson(data['user']);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Login failed')),

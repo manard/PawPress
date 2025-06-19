@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pawpress/api_config.dart';
 import 'package:pawpress/models/Product.dart';
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/OwnerProfile.dart';
-import 'package:pawpress/widgets/bottom_nav_bar.dart';
+import 'package:pawpress/screens/Store.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -13,6 +16,7 @@ class ProductDetailsPage extends StatefulWidget {
     super.key,
     required this.product,
     required this.owner,
+    required int productID,
   });
 
   @override
@@ -21,7 +25,7 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int quantity = 1;
-  int _currentIndex = 2;
+  int _currentIndex = 1;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -42,12 +46,21 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           builder: (context) => HomeScreen(owner: widget.owner),
         ),
       );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StorePage(userID: widget.owner.userID, owner: widget.owner),
+        ),
+      );
     }
+    setState(() => _currentIndex = index);
   }
 
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final maxQuantity = product.quantity; // Maximum quantity from product data
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FBFF),
@@ -79,7 +92,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   borderRadius: BorderRadius.circular(18),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Image.asset(product.productimg, fit: BoxFit.contain),
+                    child: Image.asset('assets/Bird.png'),
                   ),
                 ),
               ),
@@ -174,7 +187,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () => setState(() => quantity++),
+                            onPressed:
+                                quantity < maxQuantity
+                                    ? () => setState(() => quantity++)
+                                    : null,
                             icon: const Icon(
                               Icons.add_circle_outline,
                               color: Color(0xFF1e96fc),
@@ -207,31 +223,66 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${product.name} added to cart!'),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: const Color(0xFF1e96fc),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          );
+                        onPressed: () async {
+                          if (quantity <= maxQuantity) {
+                            final url = Uri.parse(
+                              '${ApiConfig.baseURL}/addToCart',
+                            );
+                            final response = await http.post(
+                              url,
+                              headers: {'Content-Type': 'application/json'},
+                              body: jsonEncode({
+                                'userID': widget.owner.userID,
+                                'productID': widget.product.productId,
+                                'quantity': quantity,
+                              }),
+                            );
+
+                            if (response.statusCode == 200) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Added to cart successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Failed to add to cart.'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                            print("Status Code: ${response.statusCode}");
+                            print("Response Body: ${response.body}");
+                          }
                         },
                       ),
                     ),
                     const SizedBox(height: 20),
+                    Text(
+                      'Product ID: ${product.productId}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Price: ${product.price.toStringAsFixed(2)} USD',
+                      style: const TextStyle(fontSize: 18, color: Colors.green),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      product.description,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
       ),
     );
   }

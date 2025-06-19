@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'login.dart';
+import 'package:pawpress/api_config.dart';
 
 class SignUpPage extends StatelessWidget {
   final String role;
@@ -20,7 +21,7 @@ class SignUpPage extends StatelessWidget {
     Future<void> signUp() async {
       try {
         final response = await http.post(
-          Uri.parse('http://192.168.0.107:3000/signup'),
+          Uri.parse('${ApiConfig.baseURL}/signup'),
           headers: {"Content-Type": "application/json"},
           body: json.encode({
             'firstName': firstNameController.text,

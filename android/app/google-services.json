@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "817559615967",
+    "project_id": "pawpress-c3e9a",
+    "storage_bucket": "pawpress-c3e9a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817559615967:android:5f58d211b1ad818e7e6c6a",
+        "android_client_info": {
+          "package_name": "com.example.pawpress"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJPu3tCa5aVkybMCe_V1Y5eCz-pJUe5JY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
