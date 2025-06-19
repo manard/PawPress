@@ -51,26 +51,25 @@ app.post('/login', (req, res) => {
     }
 
     const user = results[0];
-    if (user.role === 'pet_owner') {
-      return res.status(200).json({
-        message: 'Login successful',
-        role: user.role,
-        user: {
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          password: user.password,
-          address: user.address,
-          phoneNumber: user.phoneNumber,
-          userID: user.userID , // Include userID in the response
-        }
-      });
-    } else {
-      return res.status(403).json({ message: 'Only pet_owner can login here' });
-    }
+
+    // رجع البيانات حسب الدور
+    return res.status(200).json({
+      message: 'Login successful',
+      role: user.role,
+      user: {
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: user.password,
+        address: user.address,
+        phoneNumber: user.phoneNumber,
+        userID: user.userID, // Include userID in the response
+      }
+    });
   });
 });
+
 
 // ======= Fetch Products =======
 app.get('/product', (req, res) => {

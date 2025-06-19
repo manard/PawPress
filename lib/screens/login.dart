@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pawpress/models/petOwner.dart';
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/signup.dart';
+import 'package:pawpress/screens/veterinarian_home_page.dart';
 import 'package:pawpress/api_config.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,25 +44,35 @@ class _LoginPageState extends State<LoginPage> {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 &&
-          data['user'] != null &&
-          data['role']?.toString() == 'pet_owner') {
-        final userID = data['user']['userID'];
+     if (response.statusCode == 200 && data['user'] != null) {
+  final role = data['role']?.toString();
+  final userID = data['user']['userID'];
 
-        // Save userID in SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt('userID', userID);
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('userID', userID);
 
-        final owner = petOwner.fromJson(data['user']);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Login failed')),
-        );
-      }
+  final owner = petOwner.fromJson(data['user']);
+
+  if (role == 'pet_owner') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
+    );
+  } else if (role == 'vet') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => VeterinarianHomePage()),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Unknown user role')),
+    );
+  }
+} else {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(data['message'] ?? 'Login failed')),
+  );
+}
     } catch (e) {
       ScaffoldMessenger.of(
         context,
