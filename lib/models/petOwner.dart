@@ -8,9 +8,9 @@ class petOwner {
   final String password;
   final String address;
   final String phoneNumber;
-  // String imageName; //should be imageUrl for firbase
   String role;
   final List<Pet> pets;
+  final int userID; // New field added
 
   petOwner(
     this.pets, {
@@ -21,8 +21,8 @@ class petOwner {
     required this.lastName,
     required this.address,
     required this.phoneNumber,
-    // required this.imageName,
     required this.role,
+    required this.userID, // New field added
   });
 
   factory petOwner.fromJson(Map<String, dynamic> json) {
@@ -40,6 +40,10 @@ class petOwner {
       address: json['address'] ?? '',
       password: json['password'] ?? '',
       role: json['role'] ?? '',
+      userID: (json['userID'] as int?) ?? 0,
+      // New field added
     );
   }
+
+  get image => null;
 }

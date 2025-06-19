@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pawpress/models/petOwner.dart';
-import 'package:pawpress/widgets/bottom_nav_bar.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final petOwner user;
@@ -39,7 +38,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavBar(currentIndex: 0),
+      // TODO: Replace with your actual BottomNavBar implementation or import the correct file.
+      // bottomNavigationBar: BottomNavBar(currentIndex: 0),
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(height: 56), // Placeholder for navigation bar
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

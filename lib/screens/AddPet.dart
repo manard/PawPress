@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:pawpress/models/petOwner.dart';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:file_selector/file_selector.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pawpress/api_config.dart';
 
 class AddPet extends StatefulWidget {
-  final petOwner owner;
+  const AddPet({super.key});
 
-  const AddPet({super.key, required this.owner});
   @override
   _AddPetState createState() => _AddPetState();
 }
@@ -17,52 +18,112 @@ class _AddPetState extends State<AddPet> {
 
   String? name, breed, gender;
   int? age;
-  File? petImage;
-  PlatformFile? healthRecordFile;
+  File? image;
+  XFile? health_record_path;
+  int? userID;
 
   final List<String> genderOptions = ['Male', 'Female'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loaduserID();
+  }
+
+  Future<void> _loaduserID() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userID = prefs.getInt('userID');
+    });
+  }
 
   Future<void> pickPetImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() {
-        petImage = File(picked.path);
+        image = File(picked.path);
       });
     }
   }
 
   Future<void> pickHealthRecord() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'png'],
+    final XTypeGroup typeGroup = XTypeGroup(
+      label: 'Documents',
+      extensions: ['pdf', 'jpg', 'png'],
     );
-    if (result != null) {
+    final XFile? file = await openFile(acceptedTypeGroups: [typeGroup]);
+    if (file != null) {
       setState(() {
-        healthRecordFile = result.files.first;
+        health_record_path = file;
       });
     }
   }
 
-  void savePet() {
+  void savePet() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Here you can send data to server or store locally
-      print("Name: $name");
-      print("Age: $age");
-      print("Gender: $gender");
-      print("Breed: $breed");
-      print("Image: ${petImage?.path}");
-      print("Health Record: ${healthRecordFile?.name}");
+      try {
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('${ApiConfig.baseURL}/addpet'),
+        );
 
-      // Show success message or navigate
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Pet added successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
+        request.fields['name'] = name!;
+        request.fields['age'] = age.toString();
+        request.fields['gender'] = gender!;
+        request.fields['breed'] = breed!;
+        request.fields['userID'] =
+            userID.toString(); // Updated to match the database column name
+
+        if (image != null) {
+          request.files.add(
+            await http.MultipartFile.fromPath('image', image!.path),
+          );
+        }
+
+        if (health_record_path != null) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'health_record_path',
+              health_record_path!.path,
+            ),
+          );
+        }
+
+        print('Request fields: ${request.fields}');
+        print(
+          'Request files: ${request.files.map((file) => file.field + ": " + (file.filename ?? "no filename")).toList()}',
+        );
+        print('Request URL: ${request.url}');
+
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: $responseBody');
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Pet added successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to add pet: $responseBody'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -118,8 +179,8 @@ class _AddPetState extends State<AddPet> {
                       ),
                       child: ClipOval(
                         child:
-                            petImage != null
-                                ? Image.file(petImage!, fit: BoxFit.cover)
+                            image != null
+                                ? Image.file(image!, fit: BoxFit.cover)
                                 : Container(
                                   color: Colors.grey.shade100,
                                   child: Icon(
@@ -205,11 +266,11 @@ class _AddPetState extends State<AddPet> {
                 ),
               ),
 
-              if (healthRecordFile != null)
+              if (health_record_path != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    'Selected: ${healthRecordFile!.name}',
+                    'Selected: ${health_record_path!.name}',
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
