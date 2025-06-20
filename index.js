@@ -271,46 +271,6 @@ app.post('/getAdoptionDetails', (req, res) => {
   });
 });
 
-// ======= Clinics Endpoint =======
-app.post('/clinics', (req, res) => {
-  const { latitude, longitude } = req.body;
-
-  const sql = `SELECT id, name, address, phone, latitude, longitude, image_url FROM clinics`;
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Error fetching clinics:', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
-    }
-
-    const haversine = (lat1, lon1, lat2, lon2) => {
-      const toRad = (value) => (value * Math.PI) / 180;
-      const R = 6371;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    };
-
-    const clinicsWithDistance = results.map((clinic) => {
-      const distance = haversine(
-        parseFloat(latitude),
-        parseFloat(longitude),
-        parseFloat(clinic.latitude),
-        parseFloat(clinic.longitude)
-      );
-      return { ...clinic, distance };
-    });
-
-    clinicsWithDistance.sort((a, b) => a.distance - b.distance);
-
-    res.status(200).json(clinicsWithDistance);
-  });
-});
-
 // ======= Add to Cart =======
 app.post('/addToCart', (req, res) => {
   const { userID, productID, quantity } = req.body;
@@ -347,9 +307,6 @@ app.post('/addToCart', (req, res) => {
     }
   });
 });
-
-
-
 // PayPal sandbox credentials
 const PAYPAL_CLIENT_ID = 'AdjPCgjnKsG6A5bMeZHerGeK5QnkH_2qwQ3aNeM-GmOWkducueZBWwUzbPwdS6CQ_SsYyRvO4DSZRY6J';
 const PAYPAL_SECRET = 'EPVMgP7kpKhx-PBWlI8s-etuvQDmM1SOe8QcUe4xQvoQK9cx2Y3Tjx7Zx8iRFNB8cJYqHHUDAxwBAghl';
@@ -484,6 +441,45 @@ app.post('/complete-order', async (req, res) => {
 
       insertOrderProduct(0);
     });
+  });
+});
+// ======= Clinics Endpoint =======
+app.post('/clinics', (req, res) => {
+  const { latitude, longitude } = req.body;
+
+  const sql = `SELECT id, name, address, phone, latitude, longitude, image_url FROM clinics`;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching clinics:', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
+    }
+
+    const haversine = (lat1, lon1, lat2, lon2) => {
+      const toRad = (value) => (value * Math.PI) / 180;
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
+
+    const clinicsWithDistance = results.map((clinic) => {
+      const distance = haversine(
+        parseFloat(latitude),
+        parseFloat(longitude),
+        parseFloat(clinic.latitude),
+        parseFloat(clinic.longitude)
+      );
+      return { ...clinic, distance };
+    });
+
+    clinicsWithDistance.sort((a, b) => a.distance - b.distance);
+
+    res.status(200).json(clinicsWithDistance);
   });
 });
 // ======= Remove from Cart =======
