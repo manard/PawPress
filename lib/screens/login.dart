@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('${ApiConfig.baseURL}/login');
+    final url = Uri.parse('${ApiConfig.baseURL}/login'); //login endpoint
 
     try {
       final response = await http.post(
