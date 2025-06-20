@@ -69,7 +69,7 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
   }
 
   Future<void> fetchProducts() async {
-    final url = Uri.parse('${ApiConfig.baseURL}/product');
+    final url = Uri.parse('http://localhost:3000/product');
     try {
       final response = await http.get(url);
 

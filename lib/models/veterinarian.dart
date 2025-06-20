@@ -1,19 +1,31 @@
 class Veterinarian {
   final String username;
-  final String licenseNumber;
-  final String contactDetails;
-  final String specialization;
-  final String clinicName;
-  final String email; // ✅ new
-  final String phoneNumber; // ✅ new
+  final String email;
+  final String phoneNumber;
+  final String specialization;  // Required (already specified)
+  final String? licenseNumber;  // Will be added later
+  final String? contactDetails; // Will be added later
+  final String? clinicName;     // Will be added later
 
   Veterinarian({
     required this.username,
-    required this.licenseNumber,
-    required this.contactDetails,
-    required this.specialization,
-    required this.clinicName,
-    required this.email, // ✅ new
-    required this.phoneNumber, // ✅ new
+    required this.email,
+    required this.phoneNumber,
+    required this.specialization, // Marked as required
+    this.licenseNumber,
+    this.contactDetails, 
+    this.clinicName,
   });
+
+  factory Veterinarian.fromJson(Map<String, dynamic> json) {
+    return Veterinarian(
+      username: json['username'],
+      email: json['email'],
+      phoneNumber: json['phoneNumber'],
+      specialization: json['specialization'], // No null check needed
+      licenseNumber: json['licenseNumber'],
+      contactDetails: json['contactDetails'],
+      clinicName: json['clinicName'],
+    );
+  }
 }

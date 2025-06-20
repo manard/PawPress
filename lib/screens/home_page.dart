@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Future<List<Pet>> _fetchPets() async {
-    final url = Uri.parse('${ApiConfig.baseURL}/getpets');
+    final url = Uri.parse('http://localhost:3000/getpets');
     try {
       final response = await http.post(
         url,

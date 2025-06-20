@@ -22,7 +22,7 @@ class _StorePageState extends State<StorePage> {
   Set<int> selectedItems = {}; // store selected productIDs
 
   Future<List<Cart>> fetchCartData() async {
-    final url = Uri.parse('${ApiConfig.baseURL}/getUserCart');
+    final url = Uri.parse('http://localhost:3000/getUserCart');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -38,7 +38,7 @@ class _StorePageState extends State<StorePage> {
   }
 
   Future<void> removeFromCart(int productID) async {
-    final url = Uri.parse('${ApiConfig.baseURL}/removeFromCart');
+    final url = Uri.parse('http://localhost:3000/removeFromCart');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

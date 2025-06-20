@@ -64,7 +64,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   Future<void> _fetchPetDetails() async {
-    final url = Uri.parse('${ApiConfig.baseURL}/getpetdetails');
+    final url = Uri.parse('http://localhost:3000/getpetdetails');
     try {
       final response = await http.post(
         url,
@@ -90,7 +90,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   Future<void> _fetchCurrentUser() async {
-    final url = Uri.parse('${ApiConfig.baseURL}/getuserdetails');
+    final url = Uri.parse('http://localhost:3000/getuserdetails');
     try {
       final response = await http.post(
         url,
@@ -260,7 +260,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  final url = Uri.parse('${ApiConfig.baseURL}/adoption');
+                  final url = Uri.parse('http://localhost:3000/adoption');
                   try {
                     final response = await http.post(
                       url,
@@ -447,7 +447,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                     )
                                     : petData!['image'] != null
                                     ? Image.network(
-                                      '${ApiConfig.baseURL}/${petData!['image']}',
+                                      'http://localhost:3000/${petData!['image']}',
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) =>

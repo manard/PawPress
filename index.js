@@ -385,6 +385,8 @@ app.post('/removeFromCart', (req, res) => {
   });
 });
 
+
+//==sign up vet==
 app.post('/signupVet', (req, res) => {
   console.log('Received vet signup:', req.body);
   const { username, email, password, firstName, lastName, phoneNumber, role, address, specialization } = req.body;

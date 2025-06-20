@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<OwnerProfile> {
                 child:
                     pet.image.isNotEmpty
                         ? Image.network(
-                          '${ApiConfig.baseURL}/${pet.image!.replaceAll("\\", "/")}',
+                          'http://localhost:3000/${pet.image!.replaceAll("\\", "/")}',
                           fit: BoxFit.cover,
                           errorBuilder:
                               (context, error, stackTrace) => const Icon(
@@ -127,7 +127,7 @@ class _ProfileScreenState extends State<OwnerProfile> {
   Future<void> _fetchPets() async {
     try {
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseURL}/getpets'),
+        Uri.parse('http://localhost:3000/getpets'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'userID': widget.owner.userID}),
       );

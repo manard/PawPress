@@ -226,7 +226,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         onPressed: () async {
                           if (quantity <= maxQuantity) {
                             final url = Uri.parse(
-                              '${ApiConfig.baseURL}/addToCart',
+                              'http://localhost:3000/addToCart',
                             );
                             final response = await http.post(
                               url,
