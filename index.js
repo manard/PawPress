@@ -348,42 +348,8 @@ app.post('/addToCart', (req, res) => {
   });
 });
 
-// ======= Get User Cart =======
-app.post('/getUserCart', (req, res) => {
-  const { userID } = req.body;
 
-  const sql = `
-    SELECT 
-      cart2.productID,
-      cart2.quantity,
-      product.name,
-      product.description,
-      product.price
-    FROM cart2
-    JOIN product ON cart2.productID = product.productID
-    WHERE cart2.userID = ?
-  `;
 
-  db.query(sql, [userID], (err, results) => {
-    if (err) {
-      console.error("Error fetching user cart:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
-    res.status(200).json(results);
-  });
-});
-app.post('/removeFromCart', (req, res) => {
-  const { userID, productID } = req.body;
-
-  const sql = 'DELETE FROM cart2 WHERE userID = ? AND productID = ?';
-  db.query(sql, [userID, productID], (err, result) => {
-    if (err) {
-      console.error('Error removing item from cart:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
-    res.status(200).json({ message: 'Item removed successfully' });
-  });
-});
 // PayPal sandbox credentials
 const PAYPAL_CLIENT_ID = 'AdjPCgjnKsG6A5bMeZHerGeK5QnkH_2qwQ3aNeM-GmOWkducueZBWwUzbPwdS6CQ_SsYyRvO4DSZRY6J';
 const PAYPAL_SECRET = 'EPVMgP7kpKhx-PBWlI8s-etuvQDmM1SOe8QcUe4xQvoQK9cx2Y3Tjx7Zx8iRFNB8cJYqHHUDAxwBAghl';
@@ -518,6 +484,43 @@ app.post('/complete-order', async (req, res) => {
 
       insertOrderProduct(0);
     });
+  });
+});
+// ======= Remove from Cart =======
+app.post('/removeFromCart', (req, res) => {
+  const { userID, productID } = req.body;
+
+  const sql = 'DELETE FROM cart2 WHERE userID = ? AND productID = ?';
+  db.query(sql, [userID, productID], (err, result) => {
+    if (err) {
+      console.error('Error removing item from cart:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({ message: 'Item removed successfully' });
+  });
+});
+// ======= Get User Cart =======
+app.post('/getUserCart', (req, res) => {
+  const { userID } = req.body;
+
+  const sql = `
+    SELECT 
+      cart2.productID,
+      cart2.quantity,
+      product.name,
+      product.description,
+      product.price
+    FROM cart2
+    JOIN product ON cart2.productID = product.productID
+    WHERE cart2.userID = ?
+  `;
+
+  db.query(sql, [userID], (err, results) => {
+    if (err) {
+      console.error("Error fetching user cart:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.status(200).json(results);
   });
 });
 
