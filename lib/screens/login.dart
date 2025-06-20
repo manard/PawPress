@@ -4,12 +4,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pawpress/models/petOwner.dart';
-import 'package:pawpress/models/veterinarian.dart'; 
 import 'package:pawpress/screens/home_page.dart';
 import 'package:pawpress/screens/signup.dart';
-import 'package:pawpress/screens/veterinarian_home_page.dart';
 import 'package:pawpress/api_config.dart';
-import 'package:pawpress/screens/signupvet.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:3000/login');
+    final url = Uri.parse('${ApiConfig.baseURL}/login');
 
     try {
       final response = await http.post(
@@ -46,54 +43,29 @@ class _LoginPageState extends State<LoginPage> {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['user'] != null) {
-        final role = data['role']?.toString();
-        final userData = data['user'];
+      if (response.statusCode == 200 &&
+          data['user'] != null &&
+          data['role']?.toString() == 'pet_owner') {
+        final userID = data['user']['userID'];
 
+        // Save userID in SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userRole', role ?? '');
-        await prefs.setString('userData', jsonEncode(userData));
+        await prefs.setInt('userID', userID);
 
-        if (role == 'pet_owner') {
-          final owner = petOwner.fromJson(userData);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
-          );
-        } 
-        else if (role == 'vet') {
-          // Create basic vet object with required fields only
-          final vet = Veterinarian(
-            username: userData['username'] ?? '',
-            email: userData['email'] ?? '',
-            phoneNumber: userData['phoneNumber'] ?? '',
-            specialization: userData['specialization'] ?? 'General Practice',
-            licenseNumber: userData['licenseNumber'] ?? '',
-            contactDetails: userData['contactDetails'] ?? '',
-            clinicName: userData['clinicName'] ?? '',
-          );
-          
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VeterinarianHomePage(vet: vet),
-            ),
-          );
-        }
-        else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unknown user role')),
-          );
-        }
+        final owner = petOwner.fromJson(data['user']);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(owner: owner)),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Login failed')),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -298,12 +270,9 @@ class _LoginPageState extends State<LoginPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            selectedRole == 'vet'
-                                                ? const SignUpVet()
-                                                : SignUpPage(
-                                                    role: 'pet_owner',
-                                                  ),
+                                        builder:
+                                            (context) =>
+                                                SignUpPage(role: selectedRole),
                                       ),
                                     );
                                   }

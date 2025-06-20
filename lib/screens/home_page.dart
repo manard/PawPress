@@ -52,7 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StorePage(userID: widget.owner.userID, owner: widget.owner),
+            builder:
+                (context) =>
+                    StorePage(userID: widget.owner.userID, owner: widget.owner),
           ),
         );
         break;
@@ -77,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Future<List<Pet>> _fetchPets() async {
-    final url = Uri.parse('http://localhost:3000/getpets');
+    final url = Uri.parse('${ApiConfig.baseURL}/getpets');
     try {
       final response = await http.post(
         url,

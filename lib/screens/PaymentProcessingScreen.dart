@@ -53,7 +53,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
   }
 
   Future<void> _completeOrder() async {
-    final url = Uri.parse('http://localhost:3000/complete-order');
+    final url = Uri.parse('${ApiConfig.baseURL}/complete-order');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

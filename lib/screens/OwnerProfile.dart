@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<OwnerProfile> {
                 child:
                     pet.image.isNotEmpty
                         ? Image.network(
-                          'http://localhost:3000/${pet.image!.replaceAll("\\", "/")}',
+                          '${ApiConfig.baseURL}/${pet.image!.replaceAll("\\", "/")}',
                           fit: BoxFit.cover,
                           errorBuilder:
                               (context, error, stackTrace) => const Icon(
@@ -127,7 +127,7 @@ class _ProfileScreenState extends State<OwnerProfile> {
   Future<void> _fetchPets() async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/getpets'),
+        Uri.parse('${ApiConfig.baseURL}/getpets'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'userID': widget.owner.userID}),
       );
@@ -432,18 +432,9 @@ class _ProfileScreenState extends State<OwnerProfile> {
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'Store',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Store'),
         ],
       ),
     );

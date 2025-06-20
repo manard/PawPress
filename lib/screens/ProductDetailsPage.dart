@@ -50,7 +50,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => StorePage(userID: widget.owner.userID, owner: widget.owner),
+          builder:
+              (context) =>
+                  StorePage(userID: widget.owner.userID, owner: widget.owner),
         ),
       );
     }
@@ -226,7 +228,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         onPressed: () async {
                           if (quantity <= maxQuantity) {
                             final url = Uri.parse(
-                              'http://localhost:3000/addToCart',
+                              '${ApiConfig.baseURL}/addToCart',
                             );
                             final response = await http.post(
                               url,

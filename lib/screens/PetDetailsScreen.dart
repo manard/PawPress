@@ -64,7 +64,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   Future<void> _fetchPetDetails() async {
-    final url = Uri.parse('http://localhost:3000/getpetdetails');
+    final url = Uri.parse('${ApiConfig.baseURL}/getpetdetails');
     try {
       final response = await http.post(
         url,
@@ -90,7 +90,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   Future<void> _fetchCurrentUser() async {
-    final url = Uri.parse('http://localhost:3000/getuserdetails');
+    final url = Uri.parse('${ApiConfig.baseURL}/getuserdetails');
     try {
       final response = await http.post(
         url,
@@ -260,7 +260,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  final url = Uri.parse('http://localhost:3000/adoption');
+                  final url = Uri.parse('${ApiConfig.baseURL}/adoption');
                   try {
                     final response = await http.post(
                       url,
@@ -321,15 +321,20 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     );
   }
 
-  void _navigateToProductDetails(int productID, dynamic product, dynamic owner) {
+  void _navigateToProductDetails(
+    int productID,
+    dynamic product,
+    dynamic owner,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailsPage(
-          productID: productID,
-          product: product,
-          owner: owner,
-        ),
+        builder:
+            (context) => ProductDetailsPage(
+              productID: productID,
+              product: product,
+              owner: owner,
+            ),
       ),
     );
   }
@@ -447,7 +452,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                     )
                                     : petData!['image'] != null
                                     ? Image.network(
-                                      'http://localhost:3000/${petData!['image']}',
+                                      '${ApiConfig.baseURL}/${petData!['image']}',
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) =>

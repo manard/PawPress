@@ -24,7 +24,7 @@ class BottomNav extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
-            label: 'Store',
+            label: 'Bag',
           ),
         ],
       ),

@@ -452,3 +452,139 @@ app.post('/signupVet', (req, res) => {
     });
   });
 });
+// PayPal sandbox credentials
+const PAYPAL_CLIENT_ID = 'AdjPCgjnKsG6A5bMeZHerGeK5QnkH_2qwQ3aNeM-GmOWkducueZBWwUzbPwdS6CQ_SsYyRvO4DSZRY6J';
+const PAYPAL_SECRET = 'EPVMgP7kpKhx-PBWlI8s-etuvQDmM1SOe8QcUe4xQvoQK9cx2Y3Tjx7Zx8iRFNB8cJYqHHUDAxwBAghl';
+
+// Get PayPal Access Token
+async function getAccessToken() {
+  const response = await axios({
+    url: 'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    auth: {
+      username: PAYPAL_CLIENT_ID,
+      password: PAYPAL_SECRET,
+    },
+    data: 'grant_type=client_credentials',
+  });
+  return response.data.access_token;
+}
+
+// Create PayPal Order
+app.post('/create-paypal-order', async (req, res) => {
+  const { amount, return_url, cancel_url } = req.body;
+
+  try {
+  const accessToken = await getAccessToken(); // ✅ لازم نجيبه من الدالة
+
+  const response = await axios.post(
+    'https://api-m.sandbox.paypal.com/v2/checkout/orders',
+    {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: 'USD',
+          value: amount
+        }
+      }],
+      application_context: {
+        return_url: "myapp://paypal-success",
+        cancel_url: "myapp://paypal-cancel"
+      }
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    }
+  );
+
+
+    const approvalLink = response.data.links.find(link => link.rel === 'approve');
+    res.json({ link: approvalLink.href });
+
+  } catch (error) {
+    console.error('PayPal error:', error);
+    res.status(500).json({ error: 'PayPal request failed' });
+  }
+});
+// coplete paypal order
+app.post('/complete-order', async (req, res) => {
+  const { userID, cartItems, totalPrice } = req.body;
+
+  db.beginTransaction(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Transaction failed to start' });
+    }
+
+    const sqlInsertOrder = 'INSERT INTO ordertable (userID, totalPrice, orderStatus, created_at) VALUES (?, ?, ?, NOW())';
+    db.query(sqlInsertOrder, [userID, totalPrice, 'pending'], (err, orderResult) => {
+      if (err) {
+        return db.rollback(() => {
+          res.status(500).json({ error: err.message });
+        });
+      }
+
+      const orderID = orderResult.insertId;
+
+      const insertOrderProduct = (index) => {
+        if (index >= cartItems.length) {
+          // بعد ما نخلص من إدخال كل العناصر، نحذفهم من cart2
+          const deleteCartItems = (i) => {
+            if (i >= cartItems.length) {
+              return db.commit(err => {
+                if (err) {
+                  return db.rollback(() => {
+                    res.status(500).json({ error: err.message });
+                  });
+                }
+                res.status(200).json({ message: 'Order completed and cart updated!' });
+              });
+            }
+
+            const item = cartItems[i];
+            const sqlDelete = 'DELETE FROM cart2 WHERE userID = ? AND productID = ?';
+            db.query(sqlDelete, [userID, item.productID], (err) => {
+              if (err) {
+                return db.rollback(() => {
+                  res.status(500).json({ error: 'Failed to delete from cart: ' + err.message });
+                });
+              }
+              deleteCartItems(i + 1);
+            });
+          };
+
+          return deleteCartItems(0);
+        }
+
+        const item = cartItems[index];
+
+        const sqlUpdateQty = 'UPDATE product SET quantity = quantity - ? WHERE productID = ? AND quantity >= ?';
+        db.query(sqlUpdateQty, [item.quantity, item.productID, item.quantity], (err, updateResult) => {
+          if (err || updateResult.affectedRows === 0) {
+            return db.rollback(() => {
+              res.status(400).json({ error: `Insufficient quantity for productID ${item.productID}` });
+            });
+          }
+
+          const sqlInsertOrderProduct = 'INSERT INTO orderproduct (orderID, productID, quantity, price) VALUES (?, ?, ?, ?)';
+          db.query(sqlInsertOrderProduct, [orderID, item.productID, item.quantity, item.price], (err) => {
+            if (err) {
+              return db.rollback(() => {
+                res.status(500).json({ error: err.message });
+              });
+            }
+            insertOrderProduct(index + 1);
+          });
+        });
+      };
+
+      insertOrderProduct(0);
+    });
+  });
+});

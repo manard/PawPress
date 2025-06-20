@@ -69,7 +69,7 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
   }
 
   Future<void> fetchProducts() async {
-    final url = Uri.parse('http://localhost:3000/product');
+    final url = Uri.parse('${ApiConfig.baseURL}/product');
     try {
       final response = await http.get(url);
 
@@ -324,18 +324,9 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'Store',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Store'),
         ],
       ),
     );
