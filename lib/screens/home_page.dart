@@ -15,8 +15,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pawpress/api_config.dart';
 import 'package:pawpress/screens/PetDetailsScreen.dart';
-//import 'package:uni_links/uni_links.dart';
-//import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   final petOwner owner;
@@ -28,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 1;// for bottom navigation
 
   void _onItemTapped(int index) {
     switch (index) {
