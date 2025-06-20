@@ -67,18 +67,9 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
             const SizedBox(height: 10),
             const Text("Thank you for using PawPress❤️"),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HomeScreen(owner: widget.owner),
-                  ),
-                  (route) => false,
-                );
-              },
-              child: const Text("Back to Home"),
-            ),
+            
+            
+           
           ],
         ),
       ),
