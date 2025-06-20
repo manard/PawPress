@@ -21,7 +21,7 @@ class SignUpPage extends StatelessWidget {
     Future<void> signUp() async {
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/signup'),
+          Uri.parse('${ApiConfig.baseURL}/signup'),
           headers: {"Content-Type": "application/json"},
           body: json.encode({
             'firstName': firstNameController.text,

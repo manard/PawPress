@@ -326,7 +326,7 @@ class _MarketPlacePageState extends State<MarketPlacePage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Store'),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Bag'),
         ],
       ),
     );
