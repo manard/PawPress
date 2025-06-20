@@ -7,7 +7,6 @@ import 'package:pawpress/screens/MarketPlacePage.dart';
 import 'package:pawpress/screens/NearbyVets.dart';
 import 'package:pawpress/screens/Store.dart';
 import 'package:pawpress/widgets/header_widget.dart';
-import 'package:pawpress/widgets/service_card.dart';
 import 'package:pawpress/widgets/bottom_nav.dart';
 import 'package:pawpress/screens/OwnerProfile.dart';
 import 'package:pawpress/screens/AdoptionPlace.dart';
@@ -26,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1;// for bottom navigation
+  int _selectedIndex = 1; // for bottom navigation
 
   void _onItemTapped(int index) {
     switch (index) {
