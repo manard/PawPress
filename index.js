@@ -588,3 +588,40 @@ app.post('/signupVet', (req, res) => {
     });
   });
 });
+
+// API لإرسال إشعار وتخزينه في MySQL
+router.post('/notifications/send', async (req, res) => {
+  const { sender_id, receiver_id, title, body } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `INSERT INTO notifications (sender_id, receiver_id, title, body)
+       VALUES (?, ?, ?, ?)`,
+      [sender_id || null, receiver_id, title, body]
+    );
+
+    res.status(201).json({ message: 'Notification sent successfully', id: result.insertId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to send notification' });
+  }
+});
+
+module.exports = router;
+//Getting notifications for a specific user
+router.get('/notifications/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT * FROM notifications WHERE receiver_id = ? ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
