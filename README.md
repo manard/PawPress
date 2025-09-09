@@ -1,20 +1,15 @@
-<<<<<<< HEAD
-# pawpress
+## PawPress 🐾
 
-A new Flutter project.
+PawPress is a cross-platform mobile application developed with **Flutter** and **Node.js** as a graduation project. The platform introduces a **multi-role system** that connects pet owners, veterinarians, and administrators in one place to streamline pet care, adoption, and veterinary services.
 
-## Getting Started
+### Features
 
-This project is a starting point for a Flutter application.
+* **Pet Owner**: create and update profiles, manage pets’ information, put pets up for adoption, adopt other pets, buy pet supplies, and locate nearby veterinary clinics and pet shops.
+* **Veterinarian**: register and manage their clinic, track appointments, and maintain medical records for animals.
+* **Administrator**: manage products (add, edit, delete) and approve or reject veterinary clinic requests.
 
-A few resources to get you started if this is your first Flutter project:
+### Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# PawPress
->>>>>>> 5adfcdf6e34bc4b48ede59061b72f0bf5c21ee0a
+* **Frontend**: Flutter
+* **Backend**: Node.js
+* **Database**: MySQL
